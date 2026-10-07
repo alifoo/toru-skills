@@ -26,7 +26,7 @@ Your video appears in your library at https://toru.tools.
 
 ## What's in this repo
 
-- `skills/toru/SKILL.md`: the workflow, routes (local browser, Mac app, hosted fallback), rules and goal-writing guidance.
+- `skills/toru/SKILL.md`: the workflow, routes (Toru browser with a saved login, Mac app, local companion on request), rules and goal-writing guidance.
 - `skills/toru/references/tools.md`: the tool list by route and error codes.
 - `skills/toru/.mcp.json`: the hosted MCP server.
 - Plugin manifests for Claude Code (`.claude-plugin`), Cursor (`.cursor-plugin`) and Codex (`plugins/toru`, `.agents`).

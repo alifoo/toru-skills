@@ -3,14 +3,14 @@
 ## Account
 - `account_usage`: credits available/used/reserved and admission state.
 
-## Local browser (companion)
+## Local companion (only when the user asks to sign in on their own computer)
 - `local_browser_pair {url}` → `pairingCode`, `setupUrl` (companion page), `companionCommand`, `downloadUrl`. Give these to the user; end the turn.
 - `local_browser_status {connectionId}` → `waiting_for_companion` | `waiting_for_local_sign_in` | `ready` | `in_use` | `disconnected`.
 - `session_open {url, localConnectionId, requestId}` → recording session id.
 
-## Hosted browser (fallback)
+## Toru browser sign-in (step-by-step sessions)
 - `session_connect {url, loginEmail?, useDemoAccount?}` → `setupUrl` for the secure sign-in page. `connection_status {id}` → `ready` + `importId` means signed in; `awaiting_code` means the user must enter the e-mailed code or link on `setupUrl`. `session_open {url, importId, requestId}`.
-- `demo_accounts_list {}` → origins and usernames of demo accounts the user saved in the console (never secrets).
+- `demo_accounts_list {}` → logins the user saved in the console: `origin`, `username`, `kind` (`password` or `email`). Never secrets. Call it first for any web demo.
 
 ## Whole demo in one call (both web routes)
 - `recording_run {requestId, url, goal, guidance?, values?, maximumActions?, localConnectionId? | importId? | useDemoAccount? | loginEmail?, allowedOrigins?, render?}` → `runId`, `status: planning`.

@@ -26,18 +26,27 @@ Toru is a recording MCP for agents. You direct the demo; Toru provides the brows
 
 Toru works only through its MCP server (`https://mcp.toru.tools/mcp`, OAuth). If the `toru` tools are not available in this session, tell the user to connect Toru (plugin above, or add the URL as a remote MCP connector and sign in) and stop. Do not invent another path.
 
-Connecting Toru authorizes **Toru**, not the user's product. Product sign-in happens on the user's computer.
+Connecting Toru authorizes **Toru**, not the user's product. Toru signs in to the product with a login the user saved in the Toru console, or with an e-mail plus a code the user types on a secure Toru page. Never in chat.
 
 ## Pick the recording route
 
-1. **Local browser (default for web apps)**: `local_browser_pair` with the product URL. Give the user the companion link (`https://toru.tools/companion`), the companion command and the one-time code, then END THE TURN. The user signs in inside the companion's Chrome window and replies "ready". Then `local_browser_status` once, and `session_open` with `localConnectionId`.
-2. **Mac app (native apps, or the user's real browser session)**: `desktop_devices` first. If a Mac is paired and ready, `desktop_sources` → `desktop_select_source` to choose the window, then `desktop_recording_open`. If no Mac is paired, `desktop_recording_pair` and hand the user the setup link; opening it pairs and connects the Mac with no further clicks. Browser tools and Jev are not available on the Mac route: the user (or your own computer-use tool) performs the actions while Toru records.
-3. **Hosted browser (fallback only when the user asks)**: `session_connect` with the sign-in URL, give the user the `setupUrl`, wait for "ready", then `connection_status` and `session_open` with the `importId`. Two ways to keep passwords out of the chat: pass `loginEmail` (Toru submits only the e-mail; when the product asks for a code or magic link the connection pauses at `awaiting_code` and the user enters it on the same `setupUrl`, never in chat), or `useDemoAccount: true` when `demo_accounts_list` shows the product origin (the user saved a demo account in the console; the password is typed by Toru and never returned). Both also work inside `recording_run`.
+1. **Toru browser (default for web apps)**: one `recording_run` call.
+   - Call `demo_accounts_list` first. If the product origin is listed, pass `useDemoAccount: true`. A password login is typed by Toru and never returned; an e-mail login pauses at `awaiting_code` until the user enters the e-mailed code on the secure page.
+   - No saved login and the product needs one: ask the user only for the e-mail Toru should type and pass `loginEmail`, or send them to https://app.toru.tools/onboarding?step=login to save a login once.
+   - Public pages need no login.
+2. **Mac app (native apps)**: `desktop_devices` first. If a Mac is paired and ready, `desktop_sources` → `desktop_select_source` to choose the window, then `desktop_recording_open`. If no Mac is paired, `desktop_recording_pair` and hand the user the setup link; opening it pairs and connects the Mac. Browser tools and Jev are not available on the Mac route: the user (or your own computer-use tool) performs the actions while Toru records.
+3. **Local companion (only when the user explicitly asks to sign in on their own computer)**: `local_browser_pair`, give the user https://toru.tools/companion, the command and the code, end the turn; after "ready", `local_browser_status` once and `recording_run` with `localConnectionId`.
 
 ## Core workflow (web routes)
 
 1. Confirm the target URL and the flow in one sentence with a clear visible end state. Ask at most 1–3 focused questions if it is vague. Never substitute a marketing-page tour for an in-app flow unless asked.
-2. Pair (route 1 or 3). Then prefer **one call for the whole demo**: `recording_run {requestId, url, goal, guidance?, values?, localConnectionId? | importId?}`. Toru opens the session, starts recording, lets Jev drive the flow, stops, renders and checks the video. Poll `recording_run_status {runId, waitMs: 25000}` until `done` (then `recording_links` with `sessionId`), `needs_input` (answer with `navigation_guide` on `sessionId`), `needs_review` (the video failed the check: no credit was used; fix the flow and run again, or `recording_render` with `acceptReview:true` if the user wants it anyway) or `failed` (a captured session can still be rendered manually). Use the manual steps below only when the flow needs your own judgement at each screen.
+2. **One call for the whole demo**: `recording_run {requestId, url, goal, guidance?, values?, useDemoAccount? | loginEmail? | localConnectionId?}`. Toru opens the session, signs in, records, lets Jev drive the flow, renders with the user's brand and checks the video. Poll `recording_run_status {runId, waitMs: 25000}`:
+   - `awaiting_code`: call `connection_status` with `connectionId` and put its `setupUrl` in your final response so the user enters the code there.
+   - `needs_input`: answer with `navigation_guide` on `sessionId`.
+   - `done`: `recording_links` with `sessionId`; give the MP4 and GIF links.
+   - `needs_review`: the video failed the check and no credit was used; fix the flow and run again, or `recording_render` with `acceptReview:true` if the user wants it anyway.
+   - `failed`: a captured session can still be rendered manually.
+   Use the manual steps below only when the flow needs your own judgement at each screen.
 2b. Manual path: open the session on the intended in-app URL with `session_open`.
 3. `recording_start`. Drive the flow with the browser tools one action at a time (`browser_observe`, `browser_click`, `browser_type`, `browser_key`, `browser_scroll`, `browser_move`, `browser_wait`), or hand short goals to Jev with `navigation_start` / `navigation_status` / `navigation_guide` / `navigation_stop`. Inspect each returned screenshot before the next action.
 4. Mark moments: `mark_demo_moment` with `setup` for unimportant interactions (suppresses zoom), `action` for meaningful ones, and `result` when the requested outcome is visible, using the observationId of the first screenshot showing it. Hold on the result with `browser_wait` (about 4 s), move the cursor away from the evidence, then `recording_stop`.
@@ -53,9 +62,9 @@ Connecting Toru authorizes **Toru**, not the user's product. Product sign-in hap
 
 ## Rules
 
-- Never ask for or paste product credentials or one-time codes in chat. Sign-in is the user's, on their computer or on the secure Toru page.
+- Never ask for or paste product passwords or one-time codes in chat. An e-mail address is fine; codes go on the secure Toru page.
 - One recording per request unless the user asks for several; one flow per recording.
-- Do not poll in tight loops: `recording_status` already waits; `local_browser_status` once after the user replies.
+- Do not poll in tight loops: `recording_status` and `recording_run_status` already wait.
 - Finish with the result visible, then stop. Verify the final screen before claiming success.
 - 1 credit = 1 delivered video that passed the delivery check. Videos held in `needs_review`, failed runs, re-renders and downloads never use a credit. `recording_status` returns `credits` with the final video; when `creditsLow` is set, mention the remaining credits once when handing over the video and point to https://toru.tools/pricing (plans or credit packs). Never interrupt a flow to upsell.
 

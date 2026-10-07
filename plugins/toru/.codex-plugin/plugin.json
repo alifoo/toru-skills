@@ -1,0 +1,6 @@
+{
+  "name": "toru", "version": "0.1.0", "description": "Record polished product demo videos with your agent, signed in as you.",
+  "author": { "name": "Toru", "url": "https://toru.tools" }, "homepage": "https://toru.tools", "repository": "https://github.com/alifoo/toru-skills", "license": "MIT",
+  "keywords": ["toru", "demo-video", "screen-recording", "mcp", "skills"], "skills": "../../skills/", "mcpServers": "../../skills/toru/.mcp.json",
+  "interface": { "displayName": "Toru", "shortDescription": "Record polished product demo videos.", "longDescription": "Toru lets your agent record a product demo in a browser you sign in to yourself (or a window on your Mac), then renders a polished MP4 with cursor motion and zooms. The plugin bundles the Toru skill and the hosted MCP server configuration.", "developerName": "Toru", "category": "Productivity", "capabilities": ["Interactive", "Write"], "websiteURL": "https://toru.tools", "defaultPrompt": ["Record a demo video of my web app.", "Check a Toru recording and get the MP4.", "Record a window on my Mac."], "brandColor": "#405F6D" }
+}

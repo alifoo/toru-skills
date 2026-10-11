@@ -1,6 +1,6 @@
 # Toru Agent Skills
 
-Agent skill repository for [Toru](https://toru.tools): your agent records a polished product demo video, in a browser you sign in to yourself or in a window on your Mac, and Toru renders the MP4 with cursor motion and zooms. Toru never stores your product passwords.
+Agent skill repository for [Toru](https://toru.tools): your agent investigates your product, writes a step-by-step plan and Toru records a polished demo video of it, in Toru's browser, in your own Chrome ([Toru for Chrome](https://toru.tools/chrome)) or in an app on your Mac ([Toru for Mac](https://toru.tools/mac)). Toru renders the MP4 with cursor motion, zooms and your brand, and checks it before delivery. Your passwords never reach the chat.
 
 ## Install
 
@@ -20,13 +20,15 @@ Cursor, Codex CLI and others: `npx skills add alifoo/toru-skills`, or add `https
 
 Paste into your agent:
 
-> Record a demo video of https://app.example.com with Toru: sign in, create a new project, and end on the project dashboard. Use the local companion so I sign in myself, and give me the MP4.
+> Record a demo video of https://app.example.com with Toru: create a new project and end on the project dashboard. Give me the MP4.
+
+Your agent reads the code (or the live UI) to write the plan Toru follows: the screens, the exact button and field labels, the values and the final screen. To record in your own signed-in Chrome, add "in my Chrome"; for a Mac app, name the app.
 
 Your video appears in your library at https://toru.tools.
 
 ## What's in this repo
 
-- `skills/toru/SKILL.md`: the workflow, routes (Toru browser with a saved login, Mac app, local companion on request), rules and goal-writing guidance.
+- `skills/toru/SKILL.md`: the plan Toru requires, the routes (Toru browser with a saved login, your own Chrome, your Mac, local companion on request), the workflow and rules.
 - `skills/toru/references/tools.md`: the tool list by route and error codes.
 - `skills/toru/.mcp.json`: the hosted MCP server.
 - Plugin manifests for Claude Code (`.claude-plugin`), Cursor (`.cursor-plugin`) and Codex (`plugins/toru`, `.agents`).

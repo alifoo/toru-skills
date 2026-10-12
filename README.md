@@ -26,6 +26,16 @@ Your agent reads the code (or the live UI) to write the plan Toru follows: the s
 
 Your video appears in your library at https://toru.tools.
 
+## Toru for Mac
+
+To record native apps, install the Mac app with one line in Terminal (macOS 15+, Apple silicon):
+
+```
+curl -fsSL https://toru.tools/install.sh | bash
+```
+
+Or `brew install --cask alifoo/toru/toru`. Your agent pairs it with a link when it first records your Mac.
+
 ## What's in this repo
 
 - `skills/toru/SKILL.md`: the plan Toru requires, the routes (Toru browser with a saved login, your own Chrome, your Mac, local companion on request), the workflow and rules.

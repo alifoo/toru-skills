@@ -26,8 +26,8 @@
 - `extension_disconnect {connectionId}` unpairs a Chrome.
 
 ## Mac
-- `desktop_devices` → paired Macs with `status` (`ready` | `in_use` | `awaiting_approval` | `offline` | `revoked`), `control` and `connectionId`; empty list includes `downloadUrl` and `nextAction`.
-- `desktop_recording_pair` → `setupUrl` (https page that opens the Toru app), `pairingCode` (5 minutes), `downloadUrl`.
+- `desktop_devices` → paired Macs with `status` (`ready` | `in_use` | `awaiting_approval` | `offline` | `revoked`), `control` and `connectionId`; empty list includes `installCommand` (`curl -fsSL https://toru.tools/install.sh | bash`), `brewCommand`, `downloadUrl` and `nextAction`.
+- `desktop_recording_pair` → `setupUrl` (https page that opens the Toru app), `pairingCode` (5 minutes), `installCommand`, `brewCommand`, `downloadUrl`.
 - `desktop_sources {connectionId}` → windows and displays with ids; `desktop_select_source {connectionId, sourceId}`.
 - `desktop_recording_open {connectionId, requestId}` → capture-only session id for the recording tools.
 - `desktop_device_disconnect {connectionId}` revokes a Mac.

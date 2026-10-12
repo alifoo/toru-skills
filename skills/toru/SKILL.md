@@ -68,7 +68,7 @@ Connecting Toru authorizes **Toru**, not the user's product. Toru signs in to th
 3. **Mac app (native apps)**: `desktop_devices` first.
    - If a Mac is `ready` with `control: true`, pick the window with `desktop_sources` → `desktop_select_source`, then **one call**: `desktop_recording_run {connectionId, requestId, goal, plan, values?}`. Toru operates that window in the background (the user keeps their mouse and keyboard) and records it. Follow with `recording_run_status` like any run. Password fields stop the run: the user signs in beforehand.
    - If `control` is false, the recording is capture only: `desktop_recording_open` and the user (or your own computer-use tool) performs the flow. To let Toru operate it, the user turns on "Let your agent operate the shared window" in Toru for Mac Settings.
-   - No Mac paired: `desktop_recording_pair`, send the user to https://toru.tools/mac if the app is missing, and hand them the setup link. End the turn.
+   - No Mac paired: `desktop_recording_pair`. If the app is missing, it installs with one Terminal command, `curl -fsSL https://toru.tools/install.sh | bash` (or `brew install --cask alifoo/toru/toru`): offer to run it yourself if you have a shell on the user's Mac, otherwise give it to them to paste. No security prompt, no password. Then hand them the setup link. End the turn.
 4. **Local companion (only when the user explicitly asks to sign in on their own computer and Toru for Chrome is not an option)**: `local_browser_pair`, give the user https://toru.tools/companion, the command and the code, end the turn; after "ready", `local_browser_status` once and `recording_run` with `localConnectionId`.
 
 ## Core workflow (one call)

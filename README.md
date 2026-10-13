@@ -1,6 +1,6 @@
 # Toru Agent Skills
 
-Agent skill repository for [Toru](https://toru.tools): your agent investigates your product, writes a step-by-step plan and Toru records a polished demo video of it, in Toru's browser, in your own Chrome ([Toru for Chrome](https://toru.tools/chrome)) or in an app on your Mac ([Toru for Mac](https://toru.tools/mac)). Toru renders the MP4 with cursor motion, zooms and your brand, and checks it before delivery. Your passwords never reach the chat.
+Agent skill repository for [Toru](https://toru.tools): your agent investigates your product, writes a step-by-step plan and Toru records a polished demo video of it in one of two places: your own Chrome ([Toru for Chrome](https://toru.tools/chrome)) for web apps, or an app on your Mac ([Toru for Mac](https://toru.tools/mac)). Toru renders the MP4 with cursor motion, zooms and your brand, and checks it before delivery. You are already signed in there, so your passwords never reach Toru or the chat.
 
 ## Install
 
@@ -22,7 +22,7 @@ Paste into your agent:
 
 > Record a demo video of https://app.example.com with Toru: create a new project and end on the project dashboard. Give me the MP4.
 
-Your agent reads the code (or the live UI) to write the plan Toru follows: the screens, the exact button and field labels, the values and the final screen. To record in your own signed-in Chrome, add "in my Chrome"; for a Mac app, name the app.
+Your agent reads the code (or the live UI) to write the plan Toru follows: the screens, the exact button and field labels, the values and the final screen. Web apps are recorded in your own signed-in Chrome; the first time, your agent gives you a link to install and pair Toru for Chrome. For a Mac app, name the app.
 
 Your video appears in your library at https://toru.tools.
 
@@ -38,7 +38,7 @@ Or `brew install --cask alifoo/toru/toru`. Your agent pairs it with a link when 
 
 ## What's in this repo
 
-- `skills/toru/SKILL.md`: the plan Toru requires, the routes (Toru browser with a saved login, your own Chrome, your Mac, local companion on request), the workflow and rules.
+- `skills/toru/SKILL.md`: the plan Toru requires, the two places Toru records (your Chrome, your Mac), the workflow and rules.
 - `skills/toru/references/tools.md`: the tool list by route and error codes.
 - `skills/toru/.mcp.json`: the hosted MCP server.
 - Plugin manifests for Claude Code (`.claude-plugin`), Cursor (`.cursor-plugin`) and Codex (`plugins/toru`, `.agents`).

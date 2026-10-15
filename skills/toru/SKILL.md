@@ -72,7 +72,7 @@ Toru records in the user's own Chrome or on their Mac, both already signed in as
 
 1. Confirm the target URL and the flow in one sentence with a clear visible end state. Ask at most 1–3 focused questions if it is vague. Never substitute a marketing-page tour for an in-app flow unless asked.
 2. Write the plan (Step 0).
-3. `recording_run {requestId, url, goal, plan, localConnectionId, values?}` (or `desktop_recording_run` for a Mac). `url` is where step 1 starts; `localConnectionId` is the ready Chrome from `extension_devices`. Toru follows the plan in that Chrome, records, renders with the user's brand and checks the video.
+3. `recording_run {requestId, url, goal, plan, localConnectionId, values?}` (or `desktop_recording_run` for a Mac). The page records at 1920×1080 by default; pass `viewport: "1280x720"` or `"1440x900"` only when the user asks for a smaller page (`windowSize` does the same for a Mac window). `url` is where step 1 starts; `localConnectionId` is the ready Chrome from `extension_devices`. Toru follows the plan in that Chrome, records, renders with the user's brand and checks the video.
 4. Poll `recording_run_status {runId, waitMs: 25000}`:
    - `needs_input`: answer with `navigation_guide` on `sessionId`.
    - `done`: `recording_links` with `sessionId`; give the MP4 and GIF links.

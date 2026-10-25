@@ -1,12 +1,12 @@
 ---
 name: toru
 description: Use Toru to record a polished demo video of a product flow. Use it when the user asks for a demo, walkthrough, feature video, bug reproduction video or GIF of a web app (recorded in the user's own Chrome with Toru for Chrome) or of an app on their Mac (Toru for Mac). Also use it to check a recording, render or re-render it, fetch the MP4 link, or manage paired Chrome browsers and Macs.
-last-updated: 2026-10-13
+last-updated: 2026-10-24
 ---
 
 # Toru
 
-Toru is a recording MCP for agents. You investigate the product and write the plan; Toru carries out the plan in the user's own Chrome or Mac app, records, adds cursor motion and zooms, applies the user's brand and checks the MP4 before delivery. Toru never needs product passwords in chat.
+Toru is recording infrastructure for you, the agent. You investigate the product, write the plan and drive the flow; Toru records it in the user's own Chrome or Mac app, adds cursor motion and zooms, applies the user's brand and checks the MP4 before delivery. Toru never needs product passwords in chat.
 
 > **Freshness check**: if more than 30 days have passed since `last-updated`, tell the user this skill may be outdated and point them to the update table.
 
@@ -60,30 +60,37 @@ Connecting Toru authorizes **Toru**, not the user's product. Toru records where 
 Toru records in the user's own Chrome or on their Mac, both already signed in as the user. There is no other browser: never launch, install or suggest a separate Chrome, a Chrome profile, a headless or cloud browser for Toru, and never ask for passwords or codes. If the product shows a sign-in screen, ask the user to sign in in their Chrome (or the app) and reply done, then record.
 
 1. **Web apps: Toru for Chrome.** `extension_devices` first.
-   - A Chrome is `ready`: call `recording_run` with `localConnectionId` set to its `connectionId`. Toru opens the product in a new window there, the Toru navigator drives it and Toru records it; the user does not click anything.
+   - A Chrome is `ready`: call `recording_run` with `localConnectionId` set to its `connectionId`. Toru opens the product in a window of its own there and records it while you drive; the user does not click anything.
+   - The `url` can be a public `https://` site or a local development server on the user's machine: `http` or `https` on `localhost`, `127.0.0.1`, `[::1]`, `*.localhost` or `*.test`, any port. Start the dev server first. The recording stays on that origin; other private addresses (`10.x`, `192.168.x`, `.internal`) are refused.
    - Empty list: `extension_pair`. Send the user to `installUrl` (https://toru.tools/chrome) if the extension is missing, then give them `connectUrl` to open in that Chrome. End the turn and wait for "connected".
    - `offline` means Chrome is closed or the extension is off: ask the user to open Chrome and end the turn.
 2. **Mac apps: Toru for Mac.** `desktop_devices` first.
-   - If a Mac is `ready` with `control: true`, pick the window with `desktop_sources` → `desktop_select_source`, then **one call**: `desktop_recording_run {connectionId, requestId, goal, plan, values?}`. Toru operates that window in the background (the user keeps their mouse and keyboard) and records it. Follow with `recording_run_status` like any run. Password fields stop the run: the user signs in beforehand.
-   - If `control` is false, the recording is capture only: `desktop_recording_open` and the user (or your own computer-use tool) performs the flow. To let Toru operate it, the user turns on "Let your agent operate the shared window" in Toru for Mac Settings.
+   - If a Mac is `ready` with `control: true`, pick the window with `desktop_sources` → `desktop_select_source`, then **one call**: `desktop_recording_run {connectionId, requestId, goal, plan, values?}`. You drive that window with the `browser_*` tools, in the background (the user keeps their mouse and keyboard), and Toru records it. Follow the run like a web run. Password fields stop the run: the user signs in beforehand.
+   - If `control` is false, the recording is capture only: `desktop_recording_open` and the user (or your own computer-use tool) performs the flow. To let you operate it, the user turns on "Let your agent operate the shared window" in Toru for Mac Settings.
    - No Mac paired: `desktop_recording_pair`. If the app is missing, it installs with one Terminal command, `curl -fsSL https://toru.tools/install.sh | bash` (or `brew install --cask alifoo/toru/toru`): offer to run it yourself if you have a shell on the user's Mac, otherwise give it to them to paste. No security prompt, no password. Then hand them the setup link. End the turn.
 
-## Core workflow (one call)
+## Core workflow
 
 1. Confirm the target URL and the flow in one sentence with a clear visible end state. Ask at most 1–3 focused questions if it is vague. Never substitute a marketing-page tour for an in-app flow unless asked.
 2. Write the plan (Step 0).
-3. `recording_run {requestId, url, goal, plan, localConnectionId, values?}` (or `desktop_recording_run` for a Mac). The page records at 1920×1080 by default; pass `viewport: "1280x720"` or `"1440x900"` only when the user asks for a smaller page (`windowSize` does the same for a Mac window). `url` is where step 1 starts; `localConnectionId` is the ready Chrome from `extension_devices`. Toru follows the plan in that Chrome, records, renders with the user's brand and checks the video.
-4. Poll `recording_run_status {runId, waitMs: 25000}`:
-   - `needs_input`: answer with `navigation_guide` on `sessionId`.
+3. `recording_run {requestId, url, goal, plan, localConnectionId}` (or `desktop_recording_run` for a Mac). `url` is where step 1 starts; `localConnectionId` is the ready Chrome from `extension_devices`. Toru opens the page and starts recording.
+4. `recording_run_status {runId}` answers `agent_driving` with `sessionId` and `finalState`: you drive.
+   - Follow the plan one action at a time with `browser_click`, `browser_type`, `browser_key`, `browser_select`, `browser_scroll` and `browser_wait` on `sessionId`. Each reply shows the screen and the elements in view; `browser_observe` with `mode: "outline"` lists every element.
+   - Every action is in the video: no exploratory clicks while recording.
+   - When `finalState` is visible: `mark_demo_moment` kind `result` with that screenshot's `observationId`, then `recording_run_finish {runId, outcome: "reached"}`. Toru holds on the result, stops, renders with the brand and checks the take. If the flow cannot be completed: `outcome: "stuck"` (no credit used).
+   - Never call `recording_render` on the run's session; the run renders. If your tool list has no `recording_run_finish` (a session started before it existed), `recording_stop` on `sessionId` finishes the run as reached. After 5 minutes without a call on the session the run stops.
+5. Poll `recording_run_status {runId, waitMs: 25000}`:
    - `done`: `recording_links` with `sessionId`; give the MP4 and GIF links.
    - `needs_review`: the video failed the delivery check and no credit was used; fix the plan and run again, or `recording_render` with `acceptReview:true` if the user wants it anyway.
    - `failed`: a captured session can still be rendered manually.
-5. Use a fresh UUID `requestId` per operation and reuse it after transport timeouts.
+6. Use a fresh UUID `requestId` per operation and reuse it after transport timeouts.
+
+`navigator: "toru"` asks Toru's own navigator to drive instead, where the server offers it; it may then ask for a field value (`needs_input`, answer with `navigation_guide`) or hand you the running capture (`agent_driving` with `handoff`).
 
 ## Step-by-step path (only when each screen needs your judgement)
 
 1. `session_open {url, localConnectionId, requestId}` on the intended in-app URL in the user's Chrome, then `recording_start`.
-2. Drive one action at a time (`browser_observe`, `browser_click`, `browser_type`, `browser_key`, `browser_scroll`, `browser_move`, `browser_wait`), or hand short goals to Toru with `navigation_start` / `navigation_status` / `navigation_guide` / `navigation_stop`. Inspect each returned screenshot before the next action.
+2. Drive one action at a time (`browser_observe`, `browser_click`, `browser_type`, `browser_key`, `browser_scroll`, `browser_move`, `browser_wait`). Inspect each returned screenshot before the next action.
 3. Mark moments: `mark_demo_moment` with `setup` for unimportant interactions (no zoom), `action` for meaningful ones, and `result` when the requested outcome is visible, using the observationId of the first screenshot showing it. Hold on the result with `browser_wait` (about 4 s), move the cursor away from the evidence, then `recording_stop`.
 4. `recording_render`, then `recording_status` until `completed` (it waits up to 25 s per call), then `recording_links`. The brand saved for the product domain applies automatically; only pass `background`, `padding`, `gif` or `width` for a one-off change.
 
